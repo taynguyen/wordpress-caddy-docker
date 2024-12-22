@@ -8,10 +8,10 @@ services:
       - 443:443
       - 443:443/udp
     volumes:
-      - ./caddy/caddy_data:/data
-      - ./caddy/caddy_config:/config
+      - caddy_data:/data
+      - caddy_config:/config
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
-      - ./wordpress/html:/var/www/html
+      - wordpress_data:/var/www/html
 
   wordpress:
     image: wordpress:fpm-alpine
@@ -20,15 +20,15 @@ services:
     depends_on:
       - db
     volumes:
-      - ./wordpress/html:/var/www/html
+      - wordpress_data:/var/www/html
       - ./wordpress/custom.ini:/usr/local/etc/php/conf.d/custom.ini
     env_file: .env
 
   db:
-    image: mariadb:10.11.6-jammy
+    image: mariadb:11.4
     restart: always
     volumes:
-      - ./wordpress/mysql:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     env_file: .env
 
   wpcli:
@@ -40,28 +40,14 @@ services:
     command: "--info"
     env_file: .env
     volumes:
-      - ./wordpress/html:/var/www/html
+      - wordpress_data:/var/www/html
 
-  #phpmyadmin:
-  #  image: bitnami/phpmyadmin:5.2.0-debian-11-r43
-  #  ports:
-  #    - 8080:8080
-  #    - 8443:8443
-  #  environment:
-  #      DATABASE_HOST: db
-  #  restart: always
-
-  #redis:
-  #  image: redis:6.2.14
-  #  restart: always
-
-  #elastic:
-  #  image: elasticsearch:7.17.13
-  #  restart: always
-  #  environment:
-  #    discovery.type: single-node
-  #    xpack.security.enabled: false
-  #  ports:
-  #    - 9200:9200
-  #  volumes:
-  #    - ./elastic:/usr/share/elasticsearch/data
+volumes:
+  wordpress_data:
+    name: wordpress_data
+  mysql_data:
+    name: mysql_data
+  caddy_data:
+    name: caddy_data
+  caddy_config:
+    name: caddy_config
